@@ -67,7 +67,7 @@ class AirflowMesosScheduler(mesos.interface.Scheduler):
 
             session.add(connection)
             session.commit()
-            Session.remove()
+            session.remove()
 
     def reregistered(self, driver, masterInfo):
         logging.info("AirflowScheduler re-registered to mesos")
