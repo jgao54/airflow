@@ -2257,6 +2257,27 @@ class ConnectionModelView(wwwutils.SuperUserMixin, AirflowModelView):
                 field.data = value
 
 
+class ClusterMonitorModelView(wwwutils.SuperUserMixin, ModelViewOnly):
+    verbose_name = "Cluster Monitoring"
+    verbose_name_plural = "Clusters Monitoring"
+
+    column_list = ('pid',
+                   'job_id',
+                   'state',
+                   'job_type',
+                   'created_at',
+                   'num_runs',
+                   'num_runs_left',
+                   'latest_heartbeat',
+                   'seconds_since_latest_heartbeat')
+    column_formatters = dict(
+        created_at=datetime_f,
+        latest_heartbeat=datetime_f,
+        seconds_since_latest_heartbeat=duration_f)
+    column_searchable_list = ('pid', 'job_id', 'state', 'job_type')
+    column_filters = ('pid', 'job_id', 'state', 'job_type', 'num_runs', 'num_runs_left')
+
+
 class UserModelView(wwwutils.SuperUserMixin, AirflowModelView):
     verbose_name = "User"
     verbose_name_plural = "Users"

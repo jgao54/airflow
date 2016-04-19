@@ -19,7 +19,7 @@ import signal
 import sys
 
 import airflow
-from airflow import jobs, settings
+from airflow import jobs, cluster_monitor, settings
 from airflow import configuration as conf
 from airflow.executors import DEFAULT_EXECUTOR
 from airflow.models import DagModel, DagBag, TaskInstance, DagPickle, DagRun, Variable
@@ -312,7 +312,6 @@ def run(args, dag=None):
 def task_state(args):
     """
     Returns the state of a TaskInstance at the command line.
-
     >>> airflow task_state tutorial sleep 2015-01-01
     success
     """
@@ -394,6 +393,18 @@ def webserver(args):
     workers = args.workers or conf.get('webserver', 'workers')
     worker_timeout = (args.worker_timeout or
                       conf.get('webserver', 'webserver_worker_timeout'))
+
+    # create a cluster monitoring process
+    ctx = daemon.DaemonContext(
+            pidfile=TimeoutPIDLockFile(pid, -1),
+            files_preserve=[handle],
+            stdout=stdout,
+            stderr=stderr,
+    )
+
+    with ctx:
+        cluster_monitor.ClusterMonitor.run()
+
     if args.debug:
         print(
             "Starting the web server on port {0} and host {1}.".format(
@@ -435,6 +446,10 @@ def scheduler(args):
             stdout=stdout,
             stderr=stderr,
         )
+
+        # TODO: enable an optional flag in cli to pass in scheduler name as identifier
+        cluster_monitor.ClusterMonitor.create(ctx.pidfile, 'args.name', args.num_runs)
+
         with ctx:
             job.run()
 
@@ -893,7 +908,7 @@ class CLIFactory(object):
             'args': tuple(),
         }, {
             'func': scheduler,
-            'help': "Start a scheduler scheduler instance",
+            'help': "Start a scheduler instance",
             'args': ('dag_id_opt', 'subdir', 'num_runs', 'do_pickle',
                      'pid', 'foreground', 'stdout', 'stderr', 'log_file'),
         }, {

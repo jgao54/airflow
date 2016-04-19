@@ -27,6 +27,7 @@ class State(object):
     RUNNING = "running"
     SUCCESS = "success"
     SHUTDOWN = "shutdown"  # External request to shut down
+    STUCK = 'stuck'
     FAILED = "failed"
     UP_FOR_RETRY = "up_for_retry"
     UPSTREAM_FAILED = "upstream_failed"

@@ -24,7 +24,7 @@ from airflow import models
 from airflow.settings import Session
 
 from airflow.www.blueprints import ck, routes
-from airflow import jobs
+from airflow import jobs, cluster_monitor
 from airflow import settings
 from airflow import configuration
 
@@ -87,6 +87,9 @@ def create_app(config=None):
             models.Connection, Session, name="Connections", category="Admin"))
         av(vs.VariableView(
             models.Variable, Session, name="Variables", category="Admin"))
+        av(vs.ClusterMonitorModelView(
+            cluster_monitor.ClusterMonitor, Session, name="Cluster Monitoring",
+            category="Admin"))
 
         admin.add_link(base.MenuLink(
             category='Docs', name='Documentation',
