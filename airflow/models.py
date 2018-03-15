@@ -4172,13 +4172,13 @@ class Variable(Base, LoggingMixin):
                 fernet = get_fernet()
             except:
                 log.error("Can't decrypt _val for key={}, FERNET_KEY "
-                    "configuration missing".format(self.key))
+                          "configuration missing".format(self.key))
                 return None
             try:
                 return fernet.decrypt(bytes(self._val, 'utf-8')).decode()
             except:
                 log.error("Can't decrypt _val for key={}, invalid token "
-                    "or value".format(self.key))
+                          "or value".format(self.key))
                 return None
         else:
             return self._val

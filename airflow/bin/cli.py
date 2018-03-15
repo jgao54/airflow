@@ -698,7 +698,7 @@ def restart_workers(gunicorn_master_proc, num_workers_expected):
 def webserver(args):
     print(settings.HEADER)
 
-    rbac = args.rbac or conf.getboolean('webserver', 'rbac')
+    rbac = conf.getboolean('webserver', 'rbac')
     access_logfile = args.access_logfile or conf.get('webserver', 'access_logfile')
     error_logfile = args.error_logfile or conf.get('webserver', 'error_logfile')
     num_workers = args.workers or conf.get('webserver', 'workers')
@@ -920,9 +920,8 @@ def worker(args):
 
 
 def initdb(args):  # noqa
-
     print("DB: " + repr(settings.engine.url))
-    rbac = args.rbac or conf.getboolean('webserver', 'rbac')
+    rbac = conf.getboolean('webserver', 'rbac')
     db_utils.initdb(rbac)
     print("Done.")
 
@@ -932,7 +931,7 @@ def resetdb(args):
     if args.yes or input(
         "This will drop existing tables if they exist. "
         "Proceed? (y/n)").upper() == "Y":
-        rbac = args.rbac or conf.getboolean('webserver', 'rbac')
+        rbac = conf.getboolean('webserver', 'rbac')
         db_utils.resetdb(rbac)
     else:
         print("Bail.")
@@ -1271,10 +1270,6 @@ class CLIFactory(object):
                   "again."),
             type=float,
             default=1.0),
-        'rbac': Arg(
-            ('-rb', '--rbac'),
-            "Overrides rbac config in airflow.cfg and assume it to be true",
-            "store_true"),
         # list_tasks
         'tree': Arg(("-t", "--tree"), "Tree view", "store_true"),
         # list_dags
@@ -1640,7 +1635,7 @@ class CLIFactory(object):
         }, {
             'func': initdb,
             'help': "Initialize the metadata database",
-            'args': ('rbac',),
+            'args': tuple(),
         }, {
             'func': list_dags,
             'help': "List all the DAGs",
@@ -1677,12 +1672,12 @@ class CLIFactory(object):
             'func': webserver,
             'help': "Start a Airflow webserver instance",
             'args': ('port', 'workers', 'workerclass', 'worker_timeout', 'hostname',
-                     'pid', 'daemon', 'stdout', 'stderr', 'access_logfile', 'rbac',
+                     'pid', 'daemon', 'stdout', 'stderr', 'access_logfile',
                      'error_logfile', 'log_file', 'ssl_cert', 'ssl_key', 'debug'),
         }, {
             'func': resetdb,
             'help': "Burn down and rebuild the metadata database",
-            'args': ('yes', 'rbac'),
+            'args': ('yes',),
         }, {
             'func': upgradedb,
             'help': "Upgrade the metadata database to latest version",

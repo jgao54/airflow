@@ -35,15 +35,11 @@ nose_args=$@
 
 #--with-doctest
 
-# Clean up previous builds
-python setup.py extra_clean
-
-# Generate the `airflow` executable
-python setup.py develop
+# Generate the `airflow` executable if needed
+which airflow > /dev/null || python setup.py develop
 
 echo "Initializing the DB"
-airflow initdb --rbac
-yes | airflow resetdb --rbac
+yes | airflow resetdb
 
 if [ "${TRAVIS}" ]; then
     if [ -z "$nose_args" ]; then
