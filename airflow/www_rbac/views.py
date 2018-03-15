@@ -18,6 +18,7 @@ from past.builtins import unicode
 import logging
 import os
 import socket
+import sys
 from datetime import datetime, timedelta
 import copy
 import math
@@ -71,6 +72,7 @@ from airflow.www_rbac.forms import (DateTimeForm, DateTimeWithNumRunsForm,
 from airflow.www_rbac.security import is_view_only
 from airflow.www_rbac.widgets import AirflowModelListWidget
 
+PY2 = sys.version_info[0] < 3
 PAGE_SIZE = conf.getint('webserver', 'page_size')
 dagbag = models.DagBag(settings.DAGS_FOLDER)
 
@@ -1766,7 +1768,10 @@ class VariableModelView(AirflowModelView):
     def varimport(self):
         try:
             out = request.files['file'].read()
-            d = json.loads(out)
+            if PY2:
+                d = json.loads(out)
+            else:
+                d = json.loads(out.decode('utf-8'))
         except Exception:
             raise
             flash("Missing file or syntax error.")
