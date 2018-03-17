@@ -1534,8 +1534,10 @@ class AirflowModelView(ModelView):
         '_' from the key to lookup the column names.
 
         """
-        def __init__(self, obj, session=None):
-            super(AirflowModelView.CustomSQLAInterface, self).__init__(obj, session)
+        def __init__(self, obj):
+            super(AirflowModelView.CustomSQLAInterface, self).__init__(obj)
+
+            self.session = settings.Session()
 
             def clean_column_names():
                 if self.list_properties:

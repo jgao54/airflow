@@ -131,7 +131,7 @@ ROLE_CONFIGS = [
 
 
 def init_role(sm, role_name, role_vms, role_perms):
-    sm_session = sm.get_session()
+    sm_session = sm.get_session
     pvms = sm_session.query(sqla_models.PermissionView).all()
     pvms = [p for p in pvms if p.permission and p.view_menu]
 

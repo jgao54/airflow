@@ -16,7 +16,7 @@ import socket
 import six
 
 from flask import Flask
-from flask_appbuilder import AppBuilder
+from flask_appbuilder import AppBuilder, SQLA
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
 from six.moves.urllib.parse import urlparse
@@ -46,6 +46,8 @@ def create_app(config=None, testing=False, app_name="Airflow"):
     app.config['APP_NAME'] = app_name
     app.config['TESTING'] = testing
 
+    db = SQLA(app)
+
     from airflow import api
     api.load_auth()
     api.api_auth.init_app(app)
@@ -60,7 +62,7 @@ def create_app(config=None, testing=False, app_name="Airflow"):
     with app.app_context():
         appbuilder = AppBuilder(
             app,
-            settings.Session,
+            db.session,
             security_manager_class=app.config.get('SECURITY_MANAGER_CLASS'),
             base_template='appbuilder/baselayout.html')
 
