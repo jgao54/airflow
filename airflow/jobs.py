@@ -910,6 +910,9 @@ class SchedulerJob(BaseJob):
                     external_trigger=False
                 )
                 return next_run
+            else:
+                raise AirflowException('next run date {} period_end {} now {}'.format(next_run_date, period_end, timezone.utcnow()))
+        raise AirflowException('no schedule interval')
 
     @provide_session
     def _process_task_instances(self, dag, queue, session=None):
