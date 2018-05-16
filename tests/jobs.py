@@ -2801,7 +2801,6 @@ class SchedulerJobTest(unittest.TestCase):
         session.close()
 
         scheduler = SchedulerJob()
-        dag2.clear()
 
         dr = scheduler.create_dag_run(dag2)
 
@@ -2834,7 +2833,6 @@ class SchedulerJobTest(unittest.TestCase):
         session.close()
 
         scheduler = SchedulerJob()
-        dag3.clear()
 
         dr = None
         dr = scheduler.create_dag_run(dag3)
@@ -2869,7 +2867,6 @@ class SchedulerJobTest(unittest.TestCase):
         session.close()
 
         scheduler = SchedulerJob()
-        dag4.clear()
 
         dr = None
         dr = scheduler.create_dag_run(dag4)
