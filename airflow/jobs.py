@@ -789,6 +789,7 @@ class SchedulerJob(BaseJob):
             )
             # return if already reached maximum active runs and no timeout setting
             if len(active_runs) >= dag.max_active_runs and not dag.dagrun_timeout:
+                raise AirflowException('active_runs: {} max_active_runs {} and timeout {}'.format(len(active_runs), dag.max_active_runs, dag.dagrun_timeout))
                 return
             timedout_runs = 0
             for dr in active_runs:
@@ -802,6 +803,7 @@ class SchedulerJob(BaseJob):
                     timedout_runs += 1
             session.commit()
             if len(active_runs) - timedout_runs >= dag.max_active_runs:
+                raise AirflowException('active_runs: {} max_active_runs {} and timeout {}'.format(len(active_runs), timedout_runs, dag.max_active_runs))
                 return
 
             # this query should be replaced by find dagrun
@@ -818,6 +820,7 @@ class SchedulerJob(BaseJob):
 
             # don't schedule @once again
             if dag.schedule_interval == '@once' and last_scheduled_run:
+                raise AirflowException('schedule interval {} last_scheduled_run {}'.format(dag.schedule_interval, last_scheduled_run))
                 return None
 
             # don't do scheduler catchup for dag's that don't have dag.catchup = True
@@ -871,7 +874,9 @@ class SchedulerJob(BaseJob):
                 )
 
             # don't ever schedule in the future
-            if next_run_date > timezone.utcnow():
+            now = timezone.utcnow()
+            if next_run_date > now:
+                raise AirflowException('next run date {} timezone {}'.format(next_run_date, now))
                 return
 
             # this structure is necessary to avoid a TypeError from concatenating
@@ -883,6 +888,7 @@ class SchedulerJob(BaseJob):
 
             # Don't schedule a dag beyond its end_date (as specified by the dag param)
             if next_run_date and dag.end_date and next_run_date > dag.end_date:
+                raise AirflowException('next run date {} dag end date {}'.format(next_run_date, dag.end_date))
                 return
 
             # Don't schedule a dag beyond its end_date (as specified by the task params)
@@ -892,6 +898,7 @@ class SchedulerJob(BaseJob):
             if task_end_dates:
                 min_task_end_date = min(task_end_dates)
             if next_run_date and min_task_end_date and next_run_date > min_task_end_date:
+                raise AirflowException('next_run_date {} min_task_end_date {}'.format(next_run_date, min_task_end_date))
                 return
 
             if next_run_date and period_end and period_end <= timezone.utcnow():
@@ -903,6 +910,9 @@ class SchedulerJob(BaseJob):
                     external_trigger=False
                 )
                 return next_run
+            else:
+                raise AirflowException('next run date {} period_end {} now {}'.format(next_run_date, period_end, timezone.utcnow()))
+        raise AirflowException('no schedule interval')
 
     @provide_session
     def _process_task_instances(self, dag, queue, session=None):
