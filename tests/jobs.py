@@ -2750,14 +2750,11 @@ class SchedulerJobTest(unittest.TestCase):
         Test to check that a DAG with catchup = False only schedules beginning now, not back to the start date
         """
 
-        def setup_dag(dag_id, schedule_interval, catchup):
-            six_hours_ago_to_the_hour = (now - datetime.timedelta(hours=6)).replace(
-                                        minute=0, second=0, microsecond=0)
-
+        def setup_dag(dag_id, schedule_interval, start_date, catchup):
             default_args = {
                 'owner': 'airflow',
                 'depends_on_past': False,
-                'start_date': six_hours_ago_to_the_hour
+                'start_date': start_date
             }
             dag = DAG(dag_id,
                       schedule_interval=schedule_interval,
@@ -2778,8 +2775,9 @@ class SchedulerJobTest(unittest.TestCase):
             session.close()
 
             return dag
-            
+
         now = timezone.utcnow()
+        six_hours_ago_to_the_hour = (now - datetime.timedelta(hours=6)).replace(minute=0, second=0, microsecond=0)
         three_minutes_ago = now - datetime.timedelta(minutes=3)
         two_hours_and_three_minutes_ago = three_minutes_ago - datetime.timedelta(hours=2)
 
@@ -2787,13 +2785,15 @@ class SchedulerJobTest(unittest.TestCase):
 
         dag1 = setup_dag(dag_id='dag_with_catchup',
                          schedule_interval='* * * * *',
+                         start_date=six_hours_ago_to_the_hour,
                          catchup=True)
         default_catchup = configuration.conf.getboolean('scheduler', 'catchup_by_default')
         self.assertEqual(default_catchup, True)
         self.assertEqual(dag1.catchup, True)
 
-        dag2 = setup_dag(dag_id='dag_without_catchup_minute',
-                         schedule_interval='* * * * *',
+        dag2 = setup_dag(dag_id='dag_without_catchup_5_minute',
+                         schedule_interval='*/5 * * * *',
+                         start_date=six_hours_ago_to_the_hour,
                          catchup=False)
         dr = scheduler.create_dag_run(dag2)
         # We had better get a dag run
@@ -2805,6 +2805,7 @@ class SchedulerJobTest(unittest.TestCase):
 
         dag3 = setup_dag(dag_id='dag_without_catchup_hourly',
                          schedule_interval='@hourly',
+                         start_date=six_hours_ago_to_the_hour,
                          catchup=False)
         dr = scheduler.create_dag_run(dag3)
         # We had better get a dag run
@@ -2816,6 +2817,7 @@ class SchedulerJobTest(unittest.TestCase):
 
         dag4 = setup_dag(dag_id='dag_without_catchup_once',
                          schedule_interval='@once',
+                         start_date=six_hours_ago_to_the_hour,
                          catchup=False)
         dr = scheduler.create_dag_run(dag4)
         self.assertIsNotNone(dr)
