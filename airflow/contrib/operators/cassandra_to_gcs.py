@@ -102,7 +102,7 @@ class CassandraToGoogleCloudStorageOperator(BaseOperator):
     CQL_TYPE_MAP = {
         'BytesType': 'BYTES',
         'DecimalType': 'FLOAT',
-        'UUIDType': 'STRING',
+        'UUIDType': 'BYTES',
         'BooleanType': 'BOOL',
         'ByteType': 'INTEGER',
         'AsciiType': 'STRING',
