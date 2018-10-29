@@ -22,6 +22,7 @@ from setuptools.command.test import test as TestCommand
 
 import imp
 import logging
+import json
 import os
 import sys
 import subprocess
